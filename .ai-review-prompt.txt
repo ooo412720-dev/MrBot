@@ -1,0 +1,21 @@
+Review this entire project as production backend architect.
+
+Check:
+
+1. Async bugs
+2. Memory leaks
+3. SQLAlchemy session leaks
+4. Redis connection leaks
+5. Telegram bot polling issues
+6. Security vulnerabilities
+7. FastAPI architecture
+8. Docker production issues
+9. Startup shutdown lifecycle bugs
+10. Logging problems
+11. Alembic migration issues
+12. Dependency injection issues
+13. Exception handling
+14. Race conditions
+15. Performance bottlenecks
+
+Give enterprise grade recommendations.

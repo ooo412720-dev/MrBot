@@ -1,0 +1,51 @@
+# =========================
+# Core Framework
+# =========================
+
+aiogram>=3.20
+uvicorn>=0.35
+fastapi>=0.116
+
+# =========================
+# Database (SQLite)
+# =========================
+
+sqlalchemy>=2.0
+aiosqlite>=0.20
+
+# =========================
+# Config / Environment
+# =========================
+
+pydantic>=2.0
+pydantic-settings>=2.0
+python-dotenv>=1.1
+
+# =========================
+# Scheduling
+# =========================
+
+apscheduler>=3.10
+
+# =========================
+# Security
+# =========================
+
+python-jose
+passlib
+bcrypt
+python-multipart
+
+# =========================
+# Async / Performance
+# =========================
+
+httpx
+orjson
+
+# =========================
+# Monitoring
+# =========================
+
+prometheus-client
+sentry-sdk
