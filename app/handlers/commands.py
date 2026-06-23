@@ -9,7 +9,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from app.bot.bot import bot
 from app.core.logger import logger
-from app.database.db import get_all_groups
+from app.database.db import get_all_groups, get_or_create_group_settings, get_or_create_user
 
 router = Router()
 
@@ -17,7 +17,6 @@ BOOT_IMAGE = Path(__file__).resolve().parent.parent.parent / "boot.jpg"
 
 
 async def edit_message(message: Message, text: str, kb: InlineKeyboardMarkup):
-    """يعدل الرسالة سواء كانت صورة أو نص"""
     try:
         if message.photo:
             await message.edit_caption(caption=text, reply_markup=kb)
@@ -29,9 +28,29 @@ async def edit_message(message: Message, text: str, kb: InlineKeyboardMarkup):
 
 @router.message(Command("start"))
 async def start_handler(message: Message):
+    # تسجيل المستخدم
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.full_name
+    )
+
+    # تسجيل الجروب تلقائياً إذا كان /start داخل جروب
+    if message.chat.type in ("group", "supergroup"):
+        await get_or_create_group_settings(message.chat.id, message.chat.title)
+        await message.answer(
+            f"✅ تم تسجيل الجروب: {message.chat.title}\n"
+            f"أرسل /help لعرض الأوامر."
+        )
+        return
+
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="➕ أضفني كمشرف في مجموعتك",
+            text="➕ أضفني لمجموعة",
+            url=f"https://t.me/{(await bot.get_me()).username}?startgroup=true"
+        )],
+        [InlineKeyboardButton(
+            text="📂 مجموعاتي",
             callback_data="show_my_groups"
         )],
         [InlineKeyboardButton(
@@ -55,7 +74,7 @@ async def start_handler(message: Message):
                     "• ملاحظات وفلاتر\n"
                     "• نظام نقاط ومستويات\n"
                     "• إعدادات قابلة للتخصيص\n\n"
-                    "اضغط على الزر أدناه لإضافتي لمجموعتك."
+                    "اضغط على زر (أضفني لمجموعة) للبدء."
                 ),
                 reply_markup=kb
             )
@@ -65,8 +84,7 @@ async def start_handler(message: Message):
 
     await message.answer(
         "🤖 مرحباً بك في MrBot\n\n"
-        "أنا بوت إدارة المجموعات المتكامل.\n\n"
-        "اضغط على الزر لإضافتي لمجموعتك.",
+        "اضغط على زر (أضفني لمجموعة) للبدء.",
         reply_markup=kb
     )
 
@@ -74,23 +92,14 @@ async def start_handler(message: Message):
 @router.callback_query(F.data == "show_my_groups")
 async def show_my_groups(callback: CallbackQuery):
     user_id = callback.from_user.id
+    me = await bot.get_me()
+    add_link = f"https://t.me/{me.username}?startgroup=true"
 
     try:
         groups = await get_all_groups()
     except Exception as e:
         logger.error(f"Database error: {e}")
-        await callback.answer("حدث خطأ في قاعدة البيانات. حاول لاحقاً.", show_alert=True)
-        return
-
-    if not groups:
-        me = await bot.get_me()
-        await callback.answer(
-            f"لا توجد مجموعات مسجلة بعد!\n\n"
-            f"أضفني لمجموعة عبر الرابط:\n"
-            f"https://t.me/{me.username}?startgroup=true",
-            show_alert=True
-        )
-        return
+        groups = []
 
     admin_groups = []
     for g in groups:
@@ -102,50 +111,46 @@ async def show_my_groups(callback: CallbackQuery):
         except Exception:
             continue
 
-    if not admin_groups:
-        me = await bot.get_me()
-        await callback.answer(
-            f"أنت لست مشرفاً في أي مجموعة.\n\n"
-            f"أضفني لمجموعة جديدة:\n"
-            f"https://t.me/{me.username}?startgroup=true",
-            show_alert=True
-        )
-        return
-
     keyboard = []
+
+    # زر إضافة لمجموعة جديدة دائماً موجود
+    keyboard.append([
+        InlineKeyboardButton(text="➕ أضفني لمجموعة جديدة", url=add_link)
+    ])
+
+    # أزرار المجموعات الموجودة
     for group_id, title in admin_groups:
+        group_str = str(group_id)
+        if group_str.startswith("-100"):
+            link = f"https://t.me/c/{group_str[4:]}"
+        else:
+            link = add_link
         keyboard.append([
-            InlineKeyboardButton(
-                text=f"💬 {title}",
-                url=f"https://t.me/c/{str(group_id)[4:]}"
-            )
+            InlineKeyboardButton(text=f"💬 {title}", url=link)
         ])
 
     keyboard.append([
-        InlineKeyboardButton(text="➕ مجموعة جديدة", callback_data="add_to_group"),
         InlineKeyboardButton(text="↩️ رجوع", callback_data="back_to_start")
     ])
 
     kb = InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-    text = (
-        "📋 مجموعاتك التي أدمن فيها:\n\n"
-        + "\n".join(f"• {title}" for _, title in admin_groups)
-        + "\n\nاضغط على أي مجموعة للفتحها."
-    )
+    if admin_groups:
+        text = (
+            "📋 مجموعاتك التي أدمن فيها:\n\n"
+            + "\n".join(f"• {title}" for _, title in admin_groups)
+            + "\n\nاضغط على أي مجموعة للفتحها أو أضف مجموعة جديدة."
+        )
+    else:
+        text = (
+            "📋 لا توجد مجموعات مسجلة بعد.\n\n"
+            "اضغط على زر (أضفني لمجموعة جديدة) بالأعلى\n"
+            "لإضافتي لمجموعتك كمشرف.\n\n"
+            "بعد إضافتي أرسل /start داخل المجموعة لتسجيلها."
+        )
 
     await edit_message(callback.message, text, kb)
     await callback.answer()
-
-
-@router.callback_query(F.data == "add_to_group")
-async def add_to_group_callback(callback: CallbackQuery):
-    me = await bot.get_me()
-    await callback.answer(
-        f"اضغط على هذا الرابط لإضافتي لمجموعتك:\n\n"
-        f"https://t.me/{me.username}?startgroup=true",
-        show_alert=True
-    )
 
 
 @router.callback_query(F.data == "show_help")
@@ -195,20 +200,18 @@ async def show_help_callback(callback: CallbackQuery):
 
 @router.callback_query(F.data == "back_to_start")
 async def back_to_start(callback: CallbackQuery):
+    me = await bot.get_me()
+    add_link = f"https://t.me/{me.username}?startgroup=true"
+
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(
-            text="➕ أضفني كمشرف في مجموعتك",
-            callback_data="show_my_groups"
-        )],
-        [InlineKeyboardButton(
-            text="📋 قائمة الأوامر",
-            callback_data="show_help"
-        )]
+        [InlineKeyboardButton(text="➕ أضفني لمجموعة", url=add_link)],
+        [InlineKeyboardButton(text="📂 مجموعاتي", callback_data="show_my_groups")],
+        [InlineKeyboardButton(text="📋 قائمة الأوامر", callback_data="show_help")]
     ])
     text = (
         "🤖 مرحباً بك في MrBot\n\n"
         "أنا بوت إدارة المجموعات المتكامل.\n\n"
-        "اضغط على الزر أدناه لإضافتي لمجموعتك."
+        "اضغط على زر (أضفني لمجموعة) للبدء."
     )
     await edit_message(callback.message, text, kb)
     await callback.answer()
