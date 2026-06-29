@@ -1,3 +1,5 @@
+# app/bot/setup.py
+
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 from typing import Callable, Dict, Any, Awaitable
@@ -75,7 +77,23 @@ class GroupRegistrationMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 
+class DebugMiddleware(BaseMiddleware):
+    """Middleware لتشخيص المشكلة في المجموعات"""
+    
+    async def __call__(self, handler, event, data):
+        if hasattr(event, 'text') and event.text:
+            chat_type = event.chat.type if hasattr(event, 'chat') else 'unknown'
+            logger.info(
+                f"📩 DEBUG: text='{event.text}' | "
+                f"chat_id={event.chat.id if hasattr(event, 'chat') else 'N/A'} | "
+                f"chat_type={chat_type} | "
+                f"user_id={event.from_user.id if hasattr(event, 'from_user') else 'N/A'}"
+            )
+        return await handler(event, data)
+
+
 def setup_middlewares():
+    dp.message.middleware(DebugMiddleware())  # ✅ أضف هذا أولاً
     dp.message.middleware(GroupRegistrationMiddleware())
     dp.message.middleware(LoggingMiddleware())
     dp.message.middleware(GroupCommandMiddleware())
