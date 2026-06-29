@@ -13,6 +13,7 @@ from app.bot.dispatcher import dp
 from app.bot.register import register_handlers
 from app.bot.setup import setup_middlewares
 
+
 BOOT_IMAGE = Path(__file__).resolve().parent / "boot.jpg"
 
 
