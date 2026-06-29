@@ -13,6 +13,7 @@ from app.handlers.settings import router as settings_router
 from app.handlers.whispers import router as whispers_router
 from app.handlers.messages import router as messages_router
 from app.handlers.start import router as start_router
+from app.handlers.group_commands import router as group_commands_router
 
 
 def register_handlers():
@@ -27,4 +28,5 @@ def register_handlers():
     dp.include_router(settings_router)
     dp.include_router(whispers_router)
     dp.include_router(start_router)
+    dp.include_router(group_commands_router)
     dp.include_router(messages_router)
