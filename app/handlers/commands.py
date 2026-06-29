@@ -194,7 +194,7 @@ async def show_help_callback(callback: CallbackQuery):
         "• /settings — لوحة الإعدادات\n"
         "• /whisper — همسة خاصة (بالرد)\n"
     )
-    await callback.message.answer(help_text)
+    await callback.message.answer(help_text, parse_mode=None)
     await callback.answer()
 
 
