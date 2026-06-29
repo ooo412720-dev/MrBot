@@ -1,5 +1,4 @@
 # bot.py
-# نقطة دخول لتشغيل البوت مباشرة
 
 import asyncio
 import sys
@@ -60,7 +59,7 @@ async def main():
     logger.info(f"Bot started: @{me.username}")
 
     await bot.set_my_commands([
-        {"command": "start", "description": "بدء البوت"},
+        {"command": "start", "description": "بدء البوت / تسجيل الجروب"},
         {"command": "help", "description": "قائمة الأوامر"},
         {"command": "ping", "description": "فحص البوت"},
         {"command": "id", "description": "معلومات الحساب"},
@@ -68,7 +67,22 @@ async def main():
         {"command": "settings", "description": "إعدادات الجروب"},
     ])
 
-    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    allowed_updates = [
+        "message",
+        "edited_message", 
+        "callback_query",
+        "chat_member",
+        "my_chat_member",
+        "inline_query",
+    ]
+
+    logger.info(f"Starting polling with allowed_updates: {allowed_updates}")
+    
+    await dp.start_polling(
+        bot, 
+        allowed_updates=allowed_updates,
+        drop_pending_updates=True
+    )
 
 
 if __name__ == "__main__":
