@@ -1,5 +1,5 @@
-#app/handlers/arabic_commands.py
-# أمر باللغة العربية وبدائل متعددة
+# app/handlers/arabic_commands.py
+# أمر باللغة العربية وبدائل متعددة - بدون Markdown
 
 from aiogram import Router, F
 from aiogram.filters import Command
@@ -33,12 +33,12 @@ def multi_command(*names):
 async def ban_user_arabic(message: Message):
     """حظر عضو من الجروب"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
         await message.reply("📌 رد على رسالة العضو المراد حظره.
-مثال: /حظر (بالرد)")
+مثال: /حظر (بالرد)", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
@@ -46,45 +46,49 @@ async def ban_user_arabic(message: Message):
     try:
         await bot.ban_chat_member(message.chat.id, target.id)
         await message.answer(
-            f"🚫 **تم حظر العضو**\n\n"
-            f"👤 الاسم: {target.full_name}\n"
-            f"🆔 ID: `{target.id}`"
+            f"🚫 تم حظر العضو
+
+"
+            f"👤 الاسم: {target.full_name}
+"
+            f"🆔 ID: {target.id}",
+            parse_mode=None
         )
         await add_log(message.chat.id, message.from_user.id, f"ban {target.id}")
     except TelegramBadRequest:
-        await message.answer("❌ لا يمكنني حظر هذا العضو. تأكد من أنني مشرف.")
+        await message.answer("❌ لا يمكنني حظر هذا العضو. تأكد من أنني مشرف.", parse_mode=None)
 
 
 @multi_command("unban", "فك_الحظر", "رفع_الحظر", "unblock")
 async def unban_user_arabic(message: Message):
     """رفع الحظر عن عضو"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد رفع حظره.")
+        await message.reply("📌 رد على رسالة العضو المراد رفع حظره.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
 
     try:
         await bot.unban_chat_member(message.chat.id, target.id, only_if_banned=True)
-        await message.answer(f"✅ تم رفع الحظر عن {target.full_name}")
+        await message.answer(f"✅ تم رفع الحظر عن {target.full_name}", parse_mode=None)
         await add_log(message.chat.id, message.from_user.id, f"unban {target.id}")
     except TelegramBadRequest:
-        await message.answer("❌ تعذر رفع الحظر.")
+        await message.answer("❌ تعذر رفع الحظر.", parse_mode=None)
 
 
 @multi_command("kick", "طرد", "اخراج", "remove")
 async def kick_user_arabic(message: Message):
     """طرد عضو من الجروب"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد طرده.")
+        await message.reply("📌 رد على رسالة العضو المراد طرده.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
@@ -93,25 +97,30 @@ async def kick_user_arabic(message: Message):
         await bot.ban_chat_member(message.chat.id, target.id)
         await bot.unban_chat_member(message.chat.id, target.id, only_if_banned=True)
         await message.answer(
-            f"👢 **تم طرد العضو**\n\n"
-            f"👤 الاسم: {target.full_name}"
+            f"👢 تم طرد العضو
+
+"
+            f"👤 الاسم: {target.full_name}",
+            parse_mode=None
         )
         await add_log(message.chat.id, message.from_user.id, f"kick {target.id}")
     except TelegramBadRequest:
-        await message.answer("❌ لا يمكنني طرد هذا العضو.")
+        await message.answer("❌ لا يمكنني طرد هذا العضو.", parse_mode=None)
 
 
 @multi_command("mute", "كتم", "سكوت", "silence")
 async def mute_user_arabic(message: Message):
     """كتم عضو في الجروب"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
         await message.reply(
-            "📌 رد على رسالة العضو المراد كتمه.\n"
-            "مثال: /كتم 1h (بالرد)"
+            "📌 رد على رسالة العضو المراد كتمه.
+"
+            "مثال: /كتم 1h (بالرد)",
+            parse_mode=None
         )
         return
 
@@ -120,13 +129,11 @@ async def mute_user_arabic(message: Message):
     from datetime import datetime, timedelta, timezone
     from aiogram.types import ChatPermissions
 
-    # تحليل المدة من النص
     args = message.text.split(maxsplit=1)
     duration_str = args[1] if len(args) > 1 else None
 
     until_date = None
     if duration_str:
-        # تحليل المدة: 1h, 30m, 2d
         text = duration_str.lower().strip()
         units = {"s": 1, "m": 60, "h": 3600, "d": 86400, "س": 1, "د": 60, "سا": 3600, "ي": 86400}
         for unit, multiplier in units.items():
@@ -144,24 +151,28 @@ async def mute_user_arabic(message: Message):
         await bot.restrict_chat_member(message.chat.id, target.id, permissions, until_date=until_date)
         duration_text = f"لمدة {duration_str}" if duration_str else "بشكل دائم"
         await message.answer(
-            f"🔇 **تم كتم العضو**\n\n"
-            f"👤 الاسم: {target.full_name}\n"
-            f"⏱️ {duration_text}"
+            f"🔇 تم كتم العضو
+
+"
+            f"👤 الاسم: {target.full_name}
+"
+            f"⏱️ {duration_text}",
+            parse_mode=None
         )
         await add_log(message.chat.id, message.from_user.id, f"mute {target.id}")
     except TelegramBadRequest:
-        await message.answer("❌ لا يمكنني كتم هذا العضو.")
+        await message.answer("❌ لا يمكنني كتم هذا العضو.", parse_mode=None)
 
 
 @multi_command("unmute", "فك_الكتم", "رفع_الكتم", "unsilence")
 async def unmute_user_arabic(message: Message):
     """رفع الكتم عن عضو"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد رفع كتمه.")
+        await message.reply("📌 رد على رسالة العضو المراد رفع كتمه.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
@@ -179,21 +190,21 @@ async def unmute_user_arabic(message: Message):
 
     try:
         await bot.restrict_chat_member(message.chat.id, target.id, permissions)
-        await message.answer(f"✅ تم رفع الكتم عن {target.full_name}")
+        await message.answer(f"✅ تم رفع الكتم عن {target.full_name}", parse_mode=None)
         await add_log(message.chat.id, message.from_user.id, f"unmute {target.id}")
     except TelegramBadRequest:
-        await message.answer("❌ تعذر رفع الكتم.")
+        await message.answer("❌ تعذر رفع الكتم.", parse_mode=None)
 
 
 @multi_command("warn", "تحذير", "انذار", "warning")
 async def warn_user_arabic(message: Message):
     """إعطاء تحذير لعضو"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد تحذيره.")
+        await message.reply("📌 رد على رسالة العضو المراد تحذيره.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
@@ -211,16 +222,22 @@ async def warn_user_arabic(message: Message):
             await bot.restrict_chat_member(message.chat.id, target.id, permissions)
             await clear_warnings(message.chat.id, target.id)
             await message.answer(
-                f"⚠️ **تحذير {count}/3** — تم كتم {target.full_name} تلقائياً!\n"
-                f"📝 السبب: {reason}"
+                f"⚠️ تحذير {count}/3 — تم كتم {target.full_name} تلقائياً!
+"
+                f"📝 السبب: {reason}",
+                parse_mode=None
             )
         except TelegramBadRequest:
-            await message.answer(f"⚠️ وصل {target.full_name} إلى 3 تحذيرات لكن تعذر كتمه.")
+            await message.answer(f"⚠️ وصل {target.full_name} إلى 3 تحذيرات لكن تعذر كتمه.", parse_mode=None)
     else:
         await message.answer(
-            f"⚠️ **تحذير {count}/3**\n\n"
-            f"👤 الاسم: {target.full_name}\n"
-            f"📝 السبب: {reason}"
+            f"⚠️ تحذير {count}/3
+
+"
+            f"👤 الاسم: {target.full_name}
+"
+            f"📝 السبب: {reason}",
+            parse_mode=None
         )
     await add_log(message.chat.id, message.from_user.id, f"warn {target.id}: {reason}")
 
@@ -229,29 +246,29 @@ async def warn_user_arabic(message: Message):
 async def unwarn_user_arabic(message: Message):
     """مسح تحذيرات عضو"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد مسح تحذيراته.")
+        await message.reply("📌 رد على رسالة العضو المراد مسح تحذيراته.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
     from app.database.db import clear_warnings
 
     await clear_warnings(message.chat.id, target.id)
-    await message.answer(f"✅ تم مسح جميع تحذيرات {target.full_name}")
+    await message.answer(f"✅ تم مسح جميع تحذيرات {target.full_name}", parse_mode=None)
 
 
 @multi_command("purge", "مسح", "حذف", "delete")
 async def purge_messages_arabic(message: Message):
     """حذف رسائل"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على الرسالة التي تريد الحذف منها.")
+        await message.reply("📌 رد على الرسالة التي تريد الحذف منها.", parse_mode=None)
         return
 
     try:
@@ -263,20 +280,20 @@ async def purge_messages_arabic(message: Message):
                 deleted += 1
             except Exception:
                 pass
-        await message.answer(f"🧹 تم حذف {deleted} رسالة.")
+        await message.answer(f"🧹 تم حذف {deleted} رسالة.", parse_mode=None)
     except Exception as e:
-        await message.answer(f"❌ حدث خطأ: {e}")
+        await message.answer(f"❌ حدث خطأ: {e}", parse_mode=None)
 
 
 @multi_command("pin", "تثبيت", "fix")
 async def pin_message_arabic(message: Message):
     """تثبيت رسالة"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     if not message.reply_to_message:
-        await message.reply("📌 رد على الرسالة المراد تثبيتها.")
+        await message.reply("📌 رد على الرسالة المراد تثبيتها.", parse_mode=None)
         return
 
     try:
@@ -285,9 +302,9 @@ async def pin_message_arabic(message: Message):
             message.reply_to_message.message_id,
             disable_notification=False
         )
-        await message.answer("📌 تم تثبيت الرسالة.")
+        await message.answer("📌 تم تثبيت الرسالة.", parse_mode=None)
     except TelegramBadRequest:
-        await message.answer("❌ تعذر تثبيت الرسالة.")
+        await message.answer("❌ تعذر تثبيت الرسالة.", parse_mode=None)
 
 
 # ============================================================================
@@ -300,16 +317,18 @@ async def show_rules_arabic(message: Message):
     from app.database.db import get_or_create_group_settings
     settings = await get_or_create_group_settings(message.chat.id)
     if settings.rules_text:
-        await message.answer(f"📜 **قوانين الجروب:**\n\n{settings.rules_text}")
+        await message.answer(f"📜 قوانين الجروب:
+
+{settings.rules_text}", parse_mode=None)
     else:
-        await message.answer("ℹ️ لم يتم تعيين قوانين بعد. استخدم /setrules أو /تعيين_قوانين")
+        await message.answer("ℹ️ لم يتم تعيين قوانين بعد. استخدم /setrules أو /تعيين_قوانين", parse_mode=None)
 
 
 @multi_command("setrules", "تعيين_قوانين", "قوانين_جديدة", "setlaw")
 async def set_rules_arabic(message: Message):
     """تعيين قوانين الجروب"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     args = message.text.split(maxsplit=1)
@@ -317,14 +336,17 @@ async def set_rules_arabic(message: Message):
 
     if not rules:
         await message.reply(
-            "📝 اكتب القوانين بعد الأمر.\n"
-            "مثال: /تعيين_قوانين 1. لا سبام\n2. لا إعلانات"
+            "📝 اكتب القوانين بعد الأمر.
+"
+            "مثال: /تعيين_قوانين 1. لا سبام
+2. لا إعلانات",
+            parse_mode=None
         )
         return
 
     from app.database.db import update_group_setting
     await update_group_setting(message.chat.id, "rules_text", rules)
-    await message.answer("✅ تم تعيين قوانين الجروب.")
+    await message.answer("✅ تم تعيين قوانين الجروب.", parse_mode=None)
     await add_log(message.chat.id, message.from_user.id, "set_rules")
 
 
@@ -334,20 +356,29 @@ async def show_id_arabic(message: Message):
     user = message.from_user
     chat = message.chat
     text = (
-        f"🆔 **معلومات**\n\n"
-        f"👤 المستخدم: {user.full_name}\n"
-        f"🆔 User ID: `{user.id}`\n"
-        f"💬 Chat ID: `{chat.id}`\n"
-        f"📛 النوع: {chat.type}\n"
+        f"🆔 معلومات
+
+"
+        f"👤 المستخدم: {user.full_name}
+"
+        f"🆔 User ID: {user.id}
+"
+        f"💬 Chat ID: {chat.id}
+"
+        f"📛 النوع: {chat.type}
+"
     )
     if message.reply_to_message:
         target = message.reply_to_message.from_user
         text += (
-            f"\n📋 **معلومات المردود عليه:**\n"
-            f"👤 الاسم: {target.full_name}\n"
-            f"🆔 ID: `{target.id}`"
+            f"
+📋 معلومات المردود عليه:
+"
+            f"👤 الاسم: {target.full_name}
+"
+            f"🆔 ID: {target.id}"
         )
-    await message.answer(text)
+    await message.answer(text, parse_mode=None)
 
 
 @multi_command("info", "معلومات", "بيانات", "data")
@@ -359,15 +390,21 @@ async def user_info_arabic(message: Message):
         target = message.from_user
 
     text = (
-        f"👤 **معلومات المستخدم**\n\n"
-        f"📛 الاسم: {target.full_name}\n"
-        f"🆔 ID: `{target.id}`\n"
+        f"👤 معلومات المستخدم
+
+"
+        f"📛 الاسم: {target.full_name}
+"
+        f"🆔 ID: {target.id}
+"
     )
     if target.username:
-        text += f"👤 Username: @{target.username}\n"
+        text += f"👤 Username: @{target.username}
+"
     else:
-        text += f"👤 Username: لا يوجد\n"
-    await message.answer(text)
+        text += f"👤 Username: لا يوجد
+"
+    await message.answer(text, parse_mode=None)
 
 
 @multi_command("admins", "المشرفين", "ادمن", "adminlist")
@@ -381,17 +418,21 @@ async def list_admins_arabic(message: Message):
             status = "👑 المالك" if admin.status == "creator" else "🔧 مشرف"
             admin_list.append(f"{status} — {name}")
         await message.answer(
-            "📋 **قائمة المشرفين:**\n\n" + "\n".join(admin_list)
+            "📋 قائمة المشرفين:
+
+" + "
+".join(admin_list),
+            parse_mode=None
         )
     except Exception as e:
-        await message.answer(f"❌ تعذر جلب قائمة المشرفين: {e}")
+        await message.answer(f"❌ تعذر جلب قائمة المشرفين: {e}", parse_mode=None)
 
 
 @multi_command("report", "تبليغ", "بلاغ", "reportuser")
 async def report_message_arabic(message: Message):
     """تبليغ عن رسالة"""
     if not message.reply_to_message:
-        await message.reply("📌 رد على الرسالة التي تريد الإبلاغ عنها.")
+        await message.reply("📌 رد على الرسالة التي تريد الإبلاغ عنها.", parse_mode=None)
         return
 
     try:
@@ -399,17 +440,23 @@ async def report_message_arabic(message: Message):
         admin_mentions = []
         for admin in admins:
             if not admin.user.is_bot:
-                admin_mentions.append(f"@{admin.user.username}" if admin.user.username else f"[{admin.user.full_name}](tg://user?id={admin.user.id})")
+                admin_mentions.append(f"@{admin.user.username}" if admin.user.username else admin.user.full_name)
 
         target = message.reply_to_message.from_user
         await message.answer(
-            f"🚨 **تبليغ**\n\n"
-            f"👤 المبلغ عنه: {target.full_name}\n"
-            f"🆔 ID: `{target.id}`\n\n"
-            f"{' '.join(admin_mentions[:5])}"
+            f"🚨 تبليغ
+
+"
+            f"👤 المبلغ عنه: {target.full_name}
+"
+            f"🆔 ID: {target.id}
+
+"
+            f"{' '.join(admin_mentions[:5])}",
+            parse_mode=None
         )
     except Exception:
-        await message.answer("❌ تعذر إرسال التبليغ.")
+        await message.answer("❌ تعذر إرسال التبليغ.", parse_mode=None)
 
 
 @multi_command("link", "رابط", "لينك", "url")
@@ -418,17 +465,17 @@ async def group_link_arabic(message: Message):
     try:
         chat = await bot.get_chat(message.chat.id)
         if chat.username:
-            await message.answer(f"🔗 رابط الجروب: https://t.me/{chat.username}")
+            await message.answer(f"🔗 رابط الجروب: https://t.me/{chat.username}", parse_mode=None)
         elif chat.invite_link:
-            await message.answer(f"🔗 رابط الدعوة: {chat.invite_link}")
+            await message.answer(f"🔗 رابط الدعوة: {chat.invite_link}", parse_mode=None)
         else:
             try:
                 link = await bot.export_chat_invite_link(message.chat.id)
-                await message.answer(f"🔗 رابط الدعوة: {link}")
+                await message.answer(f"🔗 رابط الدعوة: {link}", parse_mode=None)
             except Exception:
-                await message.answer("ℹ️ تعذر الحصول على الرابط.")
+                await message.answer("ℹ️ تعذر الحصول على الرابط.", parse_mode=None)
     except Exception as e:
-        await message.answer(f"❌ حدث خطأ: {e}")
+        await message.answer(f"❌ حدث خطأ: {e}", parse_mode=None)
 
 
 # ============================================================================
@@ -439,7 +486,7 @@ async def group_link_arabic(message: Message):
 async def set_welcome_arabic(message: Message):
     """تعيين رسالة ترحيب"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     args = message.text.split(maxsplit=1)
@@ -447,17 +494,24 @@ async def set_welcome_arabic(message: Message):
 
     if not text:
         await message.reply(
-            "📝 اكتب رسالة الترحيب بعد الأمر.\n\n"
-            "المتغيرات المتاحة:\n"
-            "{name} — اسم العضو\n"
-            "{chat} — اسم الجروب\n\n"
-            "مثال: /ترحيب أهلاً {name} في {chat}!"
+            "📝 اكتب رسالة الترحيب بعد الأمر.
+
+"
+            "المتغيرات المتاحة:
+"
+            "{name} — اسم العضو
+"
+            "{chat} — اسم الجروب
+
+"
+            "مثال: /ترحيب أهلاً {name} في {chat}!",
+            parse_mode=None
         )
         return
 
     from app.database.db import update_group_setting
     await update_group_setting(message.chat.id, "welcome_text", text)
-    await message.answer("✅ تم تعيين رسالة الترحيب.")
+    await message.answer("✅ تم تعيين رسالة الترحيب.", parse_mode=None)
 
 
 @multi_command("welcome", "عرض_ترحيب", "الترحيب", "showwelcome")
@@ -470,16 +524,16 @@ async def show_welcome_arabic(message: Message):
             name=message.from_user.full_name,
             chat=message.chat.title or "الجروب"
         )
-        await message.answer(f"👋 {formatted}")
+        await message.answer(f"👋 {formatted}", parse_mode=None)
     else:
-        await message.answer("ℹ️ لم يتم تعيين رسالة ترحيب. استخدم /setwelcome أو /تعيين_ترحيب")
+        await message.answer("ℹ️ لم يتم تعيين رسالة ترحيب. استخدم /setwelcome أو /تعيين_ترحيب", parse_mode=None)
 
 
 @multi_command("captcha", "كابتشا", "تحقق", "verify")
 async def toggle_captcha_arabic(message: Message):
     """تفعيل/إيقاف الكابتشا"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     from app.database.db import get_or_create_group_settings, update_group_setting
@@ -487,14 +541,14 @@ async def toggle_captcha_arabic(message: Message):
     new_val = not settings.captcha_enabled
     await update_group_setting(message.chat.id, "captcha_enabled", new_val)
     status = "✅ مفعّل" if new_val else "❌ معطل"
-    await message.answer(f"🤖 الكابتشا: {status}")
+    await message.answer(f"🤖 الكابتشا: {status}", parse_mode=None)
 
 
 @multi_command("antilink", "حظر_روابط", "لینك", "nolink")
 async def toggle_antilink_arabic(message: Message):
     """تفعيل/إيقاف حظر الروابط"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     from app.database.db import get_or_create_group_settings, update_group_setting
@@ -502,14 +556,14 @@ async def toggle_antilink_arabic(message: Message):
     new_val = not settings.antilink_enabled
     await update_group_setting(message.chat.id, "antilink_enabled", new_val)
     status = "✅ مفعّل" if new_val else "❌ معطل"
-    await message.answer(f"🔗 حظر الروابط: {status}")
+    await message.answer(f"🔗 حظر الروابط: {status}", parse_mode=None)
 
 
 @multi_command("antispam", "مكافحة_سبام", "سبام", "nospam")
 async def toggle_antispam_arabic(message: Message):
     """تفعيل/إيقاف مكافحة السبام"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     from app.database.db import get_or_create_group_settings, update_group_setting
@@ -517,14 +571,14 @@ async def toggle_antispam_arabic(message: Message):
     new_val = not settings.antispam_enabled
     await update_group_setting(message.chat.id, "antispam_enabled", new_val)
     status = "✅ مفعّل" if new_val else "❌ معطل"
-    await message.answer(f"🛡️ مكافحة السبام: {status}")
+    await message.answer(f"🛡️ مكافحة السبام: {status}", parse_mode=None)
 
 
 @multi_command("lock", "قفل", "اغلاق", "close")
 async def lock_media_arabic(message: Message):
     """قفل وسائط"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     args = message.text.split(maxsplit=1)
@@ -534,23 +588,27 @@ async def lock_media_arabic(message: Message):
 
     if lock_type in ("media", "photos", "صور", "وسائط"):
         await update_group_setting(message.chat.id, "lock_media", True)
-        await message.answer("🔒 تم قفل الصور والوسائط.")
+        await message.answer("🔒 تم قفل الصور والوسائط.", parse_mode=None)
     elif lock_type in ("stickers", "ملصقات", "ستيكر"):
         await update_group_setting(message.chat.id, "lock_stickers", True)
-        await message.answer("🔒 تم قفل الملصقات.")
+        await message.answer("🔒 تم قفل الملصقات.", parse_mode=None)
     elif lock_type in ("forward", "توجيه", "اعادة"):
         await update_group_setting(message.chat.id, "lock_forward", True)
-        await message.answer("🔒 تم قفل التوجيه.")
+        await message.answer("🔒 تم قفل التوجيه.", parse_mode=None)
     elif lock_type in ("all", "الكل", "كل"):
         await update_group_setting(message.chat.id, "lock_media", True)
         await update_group_setting(message.chat.id, "lock_stickers", True)
         await update_group_setting(message.chat.id, "lock_forward", True)
-        await message.answer("🔒 تم قفل كل الوسائط.")
+        await message.answer("🔒 تم قفل كل الوسائط.", parse_mode=None)
     else:
         await message.reply(
-            "📝 الاستخدام: /قفل <نوع>\n\n"
-            "الأنواع: media, stickers, forward, all\n"
-            "أو: صور, ملصقات, توجيه, كل"
+            "📝 الاستخدام: /قفل <نوع>
+
+"
+            "الأنواع: media, stickers, forward, all
+"
+            "أو: صور, ملصقات, توجيه, كل",
+            parse_mode=None
         )
 
 
@@ -558,7 +616,7 @@ async def lock_media_arabic(message: Message):
 async def unlock_media_arabic(message: Message):
     """فتح وسائط"""
     if not message.from_user.is_chat_admin():
-        await message.reply("❌ هذا الأمر للمشرفين فقط!")
+        await message.reply("❌ هذا الأمر للمشرفين فقط!", parse_mode=None)
         return
 
     args = message.text.split(maxsplit=1)
@@ -568,23 +626,27 @@ async def unlock_media_arabic(message: Message):
 
     if lock_type in ("media", "photos", "صور", "وسائط"):
         await update_group_setting(message.chat.id, "lock_media", False)
-        await message.answer("🔓 تم فتح الصور والوسائط.")
+        await message.answer("🔓 تم فتح الصور والوسائط.", parse_mode=None)
     elif lock_type in ("stickers", "ملصقات", "ستيكر"):
         await update_group_setting(message.chat.id, "lock_stickers", False)
-        await message.answer("🔓 تم فتح الملصقات.")
+        await message.answer("🔓 تم فتح الملصقات.", parse_mode=None)
     elif lock_type in ("forward", "توجيه", "اعادة"):
         await update_group_setting(message.chat.id, "lock_forward", False)
-        await message.answer("🔓 تم فتح التوجيه.")
+        await message.answer("🔓 تم فتح التوجيه.", parse_mode=None)
     elif lock_type in ("all", "الكل", "كل"):
         await update_group_setting(message.chat.id, "lock_media", False)
         await update_group_setting(message.chat.id, "lock_stickers", False)
         await update_group_setting(message.chat.id, "lock_forward", False)
-        await message.answer("🔓 تم فتح كل الوسائط.")
+        await message.answer("🔓 تم فتح كل الوسائط.", parse_mode=None)
     else:
         await message.reply(
-            "📝 الاستخدام: /فتح <نوع>\n\n"
-            "الأنواع: media, stickers, forward, all\n"
-            "أو: صور, ملصقات, توجيه, كل"
+            "📝 الاستخدام: /فتح <نوع>
+
+"
+            "الأنواع: media, stickers, forward, all
+"
+            "أو: صور, ملصقات, توجيه, كل",
+            parse_mode=None
         )
 
 
@@ -598,8 +660,10 @@ async def save_note_arabic(message: Message):
     args = message.text.split(maxsplit=2)
     if len(args) < 3:
         await message.reply(
-            "📝 الاستخدام: /حفظ <اسم> <نص>\n"
-            "مثال: /حفظ rules لا سبام في الجروب"
+            "📝 الاستخدام: /حفظ <اسم> <نص>
+"
+            "مثال: /حفظ rules لا سبام في الجروب",
+            parse_mode=None
         )
         return
 
@@ -607,7 +671,7 @@ async def save_note_arabic(message: Message):
     content = args[2]
     from app.database.db import save_note
     await save_note(message.chat.id, name, content, message.from_user.id)
-    await message.answer(f"✅ تم حفظ الملاحظة: `{name}`")
+    await message.answer(f"✅ تم حفظ الملاحظة: {name}", parse_mode=None)
 
 
 @multi_command("get", "جلب", "عرض", "shownote")
@@ -615,16 +679,17 @@ async def get_note_arabic(message: Message):
     """عرض ملاحظة"""
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
-        await message.reply("📝 الاستخدام: /جلب <اسم>\nمثال: /جلب rules")
+        await message.reply("📝 الاستخدام: /جلب <اسم>
+مثال: /جلب rules", parse_mode=None)
         return
 
     name = args[1]
     from app.database.db import get_note
     note = await get_note(message.chat.id, name)
     if note:
-        await message.answer(note.content)
+        await message.answer(note.content, parse_mode=None)
     else:
-        await message.answer(f"❌ الملاحظة `{name}` غير موجودة.")
+        await message.answer(f"❌ الملاحظة {name} غير موجودة.", parse_mode=None)
 
 
 @multi_command("notes", "ملاحظات", "قائمة", "listnotes")
@@ -633,10 +698,13 @@ async def list_notes_arabic(message: Message):
     from app.database.db import get_notes
     notes = await get_notes(message.chat.id)
     if notes:
-        note_list = "\n".join([f"• {note.name}" for note in notes])
-        await message.answer(f"📋 **الملاحظات:**\n\n{note_list}")
+        note_list = "
+".join([f"• {note.name}" for note in notes])
+        await message.answer(f"📋 الملاحظات:
+
+{note_list}", parse_mode=None)
     else:
-        await message.answer("ℹ️ لا توجد ملاحظات.")
+        await message.answer("ℹ️ لا توجد ملاحظات.", parse_mode=None)
 
 
 @multi_command("delete", "حذف", "امسح", "delnote")
@@ -644,15 +712,16 @@ async def delete_note_arabic(message: Message):
     """حذف ملاحظة"""
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
-        await message.reply("📝 الاستخدام: /حذف <اسم>\nمثال: /حذف rules")
+        await message.reply("📝 الاستخدام: /حذف <اسم>
+مثال: /حذف rules", parse_mode=None)
         return
 
     name = args[1]
     from app.database.db import delete_note
     if await delete_note(message.chat.id, name):
-        await message.answer(f"✅ تم حذف الملاحظة: `{name}`")
+        await message.answer(f"✅ تم حذف الملاحظة: {name}", parse_mode=None)
     else:
-        await message.answer(f"❌ الملاحظة `{name}` غير موجودة.")
+        await message.answer(f"❌ الملاحظة {name} غير موجودة.", parse_mode=None)
 
 
 @multi_command("filter", "فلتر", "رد_تلقائي", "autoreply")
@@ -661,8 +730,10 @@ async def add_filter_arabic(message: Message):
     args = message.text.split(maxsplit=2)
     if len(args) < 3:
         await message.reply(
-            "📝 الاستخدام: /فلتر <كلمة> <رد>\n"
-            "مثال: /فلتر مرحبا أهلاً بك في الجروب!"
+            "📝 الاستخدام: /فلتر <كلمة> <رد>
+"
+            "مثال: /فلتر مرحبا أهلاً بك في الجروب!",
+            parse_mode=None
         )
         return
 
@@ -670,7 +741,7 @@ async def add_filter_arabic(message: Message):
     reply = args[2]
     from app.database.db import add_filter
     await add_filter(message.chat.id, word, reply)
-    await message.answer(f"✅ تم إضافة فلتر: `{word}`")
+    await message.answer(f"✅ تم إضافة فلتر: {word}", parse_mode=None)
 
 
 # ============================================================================
@@ -684,12 +755,19 @@ async def show_rank_arabic(message: Message):
     up = await get_user_points(message.chat.id, message.from_user.id)
     if up:
         await message.answer(
-            f"📊 **مستواك**\n\n"
-            f"⭐ النقاط: {up.points}\n"
-            f"💎 السمعة: {up.reputation}"
+            f"📊 مستواك
+
+"
+            f"⭐ النقاط: {up.points}
+"
+            f"💎 السمعة: {up.reputation}",
+            parse_mode=None
         )
     else:
-        await message.answer("📊 **مستواك**\n\n⭐ النقاط: 0\n💎 السمعة: 0")
+        await message.answer("📊 مستواك
+
+⭐ النقاط: 0
+💎 السمعة: 0", parse_mode=None)
 
 
 @multi_command("top", "الأفضل", "أكثر", "leaderboard")
@@ -702,23 +780,27 @@ async def show_top_arabic(message: Message):
         for i, up in enumerate(users, 1):
             top_list.append(f"{i}. User ID: {up.user_id} — ⭐ {up.points}")
         await message.answer(
-            f"🏆 **الأكثر نشاطاً:**\n\n" + "\n".join(top_list)
+            f"🏆 الأكثر نشاطاً:
+
+" + "
+".join(top_list),
+            parse_mode=None
         )
     else:
-        await message.answer("ℹ️ لا توجد بيانات.")
+        await message.answer("ℹ️ لا توجد بيانات.", parse_mode=None)
 
 
 @multi_command("rep", "سمعة", "تقييم", "rate")
 async def give_reputation_arabic(message: Message):
     """إعطاء سمعة"""
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد إعطائه سمعة.")
+        await message.reply("📌 رد على رسالة العضو المراد إعطائه سمعة.", parse_mode=None)
         return
 
     target = message.reply_to_message.from_user
     from app.database.db import add_reputation
     await add_reputation(message.chat.id, target.id, 1)
-    await message.answer(f"💎 تم إعطاء سمعة لـ {target.full_name}")
+    await message.answer(f"💎 تم إعطاء سمعة لـ {target.full_name}", parse_mode=None)
 
 
 # ============================================================================
@@ -742,13 +824,20 @@ async def show_settings_arabic(message: Message):
     ])
 
     await message.answer(
-        f"⚙️ **إعدادات الجروب**\n\n"
-        f"👋 الترحيب: {'✅' if settings.welcome_enabled else '❌'}\n"
-        f"🤖 الكابتشا: {'✅' if settings.captcha_enabled else '❌'}\n"
-        f"🔗 حظر الروابط: {'✅' if settings.antilink_enabled else '❌'}\n"
-        f"🛡️ مكافحة السبام: {'✅' if settings.antispam_enabled else '❌'}\n"
+        f"⚙️ إعدادات الجروب
+
+"
+        f"👋 الترحيب: {'✅' if settings.welcome_enabled else '❌'}
+"
+        f"🤖 الكابتشا: {'✅' if settings.captcha_enabled else '❌'}
+"
+        f"🔗 حظر الروابط: {'✅' if settings.antilink_enabled else '❌'}
+"
+        f"🛡️ مكافحة السبام: {'✅' if settings.antispam_enabled else '❌'}
+"
         f"🔒 قفل الوسائط: {'✅' if settings.lock_media else '❌'}",
-        reply_markup=kb
+        reply_markup=kb,
+        parse_mode=None
     )
 
 
@@ -756,7 +845,7 @@ async def show_settings_arabic(message: Message):
 async def send_whisper_arabic(message: Message):
     """همسة خاصة"""
     if not message.reply_to_message:
-        await message.reply("📌 رد على رسالة العضو المراد إرسال همسة له.")
+        await message.reply("📌 رد على رسالة العضو المراد إرسال همسة له.", parse_mode=None)
         return
 
     args = message.text.split(maxsplit=1)
@@ -764,10 +853,12 @@ async def send_whisper_arabic(message: Message):
 
     target = message.reply_to_message.from_user
     try:
-        await bot.send_message(target.id, f"🤫 **همسة من {message.from_user.full_name}:**\n\n{text}")
-        await message.answer("✅ تم إرسال الهمسة!")
+        await bot.send_message(target.id, f"🤫 همسة من {message.from_user.full_name}:
+
+{text}", parse_mode=None)
+        await message.answer("✅ تم إرسال الهمسة!", parse_mode=None)
     except Exception:
-        await message.answer("❌ لا يمكنني إرسال همسة لهذا العضو. ربما لم يبدأ محادثة معي.")
+        await message.answer("❌ لا يمكنني إرسال همسة لهذا العضو. ربما لم يبدأ محادثة معي.", parse_mode=None)
 
 
 # ============================================================================
@@ -777,54 +868,101 @@ async def send_whisper_arabic(message: Message):
 @multi_command("ping", "بنج", "فحص", "test")
 async def ping_arabic(message: Message):
     """فحص البوت"""
-    await message.answer("🏓 pong")
+    await message.answer("🏓 pong", parse_mode=None)
 
 
 @multi_command("help", "مساعدة", "اوامر", "commands")
 async def help_arabic(message: Message):
     """قائمة الأوامر"""
     help_text = (
-        "📋 **قائمة الأوامر**\n\n"
-        "**🛡️ الإدارة:**\n"
-        "• /ban /حظر /طرد_نهائي — حظر عضو\n"
-        "• /unban /فك_الحظر /رفع_الحظر — رفع الحظر\n"
-        "• /kick /طرد /اخراج — طرد عضو\n"
-        "• /mute /كتم /سكوت — كتم عضو\n"
-        "• /unmute /فك_الكتم /رفع_الكتم — رفع الكتم\n"
-        "• /warn /تحذير /انذار — تحذير عضو\n"
-        "• /unwarn /حذف_التحذير /مسح_التحذير — مسح التحذيرات\n"
-        "• /purge /مسح /حذف — حذف رسائل\n"
-        "• /pin /تثبيت — تثبيت رسالة\n\n"
-        "**👥 المجموعة:**\n"
-        "• /rules /قوانين /قانون — قوانين الجروب\n"
-        "• /setrules /تعيين_قوانين — تعيين القوانين\n"
-        "• /id /ايدي /هوية — معلومات الحساب\n"
-        "• /info /معلومات /بيانات — معلومات مستخدم\n"
-        "• /admins /المشرفين /ادمن — قائمة المشرفين\n"
-        "• /report /تبليغ /بلاغ — تبليغ عن رسالة\n"
-        "• /link /رابط /لينك — رابط الجروب\n\n"
-        "**👋 الترحيب والحماية:**\n"
-        "• /setwelcome /تعيين_ترحيب /ترحيب — تعيين ترحيب\n"
-        "• /welcome /عرض_ترحيب /الترحيب — عرض الترحيب\n"
-        "• /captcha /كابتشا /تحقق — تفعيل الكابتشا\n"
-        "• /antilink /حظر_روابط /لینك — حظر الروابط\n"
-        "• /antispam /مكافحة_سبام /سبام — مكافحة السبام\n"
-        "• /lock /قفل /اغلاق — قفل وسائط\n"
-        "• /unlock /فتح /افتح — فتح وسائط\n\n"
-        "**📝 الملاحظات:**\n"
-        "• /save /حفظ /احفظ — حفظ ملاحظة\n"
-        "• /get /جلب /عرض — عرض ملاحظة\n"
-        "• /notes /ملاحظات /قائمة — قائمة الملاحظات\n"
-        "• /delete /حذف /امسح — حذف ملاحظة\n"
-        "• /filter /فلتر /رد_تلقائي — فلتر تلقائي\n\n"
-        "**📊 النقاط:**\n"
-        "• /rank /مستوى /رتبة — مستواك\n"
-        "• /top /الأفضل /أكثر — الأكثر نشاطاً\n"
-        "• /rep /سمعة /تقييم — إعطاء سمعة\n\n"
-        "**⚙️ أخرى:**\n"
-        "• /settings /اعدادات /ضبط — إعدادات الجروب\n"
-        "• /whisper /همسة /سر — همسة خاصة\n"
-        "• /ping /بنج /فحص — فحص البوت\n"
+        "📋 قائمة الأوامر
+
+"
+        "🛡️ الإدارة:
+"
+        "• /ban /حظر /طرد_نهائي — حظر عضو
+"
+        "• /unban /فك_الحظر /رفع_الحظر — رفع الحظر
+"
+        "• /kick /طرد /اخراج — طرد عضو
+"
+        "• /mute /كتم /سكوت — كتم عضو
+"
+        "• /unmute /فك_الكتم /رفع_الكتم — رفع الكتم
+"
+        "• /warn /تحذير /انذار — تحذير عضو
+"
+        "• /unwarn /حذف_التحذير /مسح_التحذير — مسح التحذيرات
+"
+        "• /purge /مسح /حذف — حذف رسائل
+"
+        "• /pin /تثبيت — تثبيت رسالة
+
+"
+        "👥 المجموعة:
+"
+        "• /rules /قوانين /قانون — قوانين الجروب
+"
+        "• /setrules /تعيين_قوانين — تعيين القوانين
+"
+        "• /id /ايدي /هوية — معلومات الحساب
+"
+        "• /info /معلومات /بيانات — معلومات مستخدم
+"
+        "• /admins /المشرفين /ادمن — قائمة المشرفين
+"
+        "• /report /تبليغ /بلاغ — تبليغ عن رسالة
+"
+        "• /link /رابط /لينك — رابط الجروب
+
+"
+        "👋 الترحيب والحماية:
+"
+        "• /setwelcome /تعيين_ترحيب /ترحيب — تعيين ترحيب
+"
+        "• /welcome /عرض_ترحيب /الترحيب — عرض الترحيب
+"
+        "• /captcha /كابتشا /تحقق — تفعيل الكابتشا
+"
+        "• /antilink /حظر_روابط /لینك — حظر الروابط
+"
+        "• /antispam /مكافحة_سبام /سبام — مكافحة السبام
+"
+        "• /lock /قفل /اغلاق — قفل وسائط
+"
+        "• /unlock /فتح /افتح — فتح وسائط
+
+"
+        "📝 الملاحظات:
+"
+        "• /save /حفظ /احفظ — حفظ ملاحظة
+"
+        "• /get /جلب /عرض — عرض ملاحظة
+"
+        "• /notes /ملاحظات /قائمة — قائمة الملاحظات
+"
+        "• /delete /حذف /امسح — حذف ملاحظة
+"
+        "• /filter /فلتر /رد_تلقائي — فلتر تلقائي
+
+"
+        "📊 النقاط:
+"
+        "• /rank /مستوى /رتبة — مستواك
+"
+        "• /top /الأفضل /أكثر — الأكثر نشاطاً
+"
+        "• /rep /سمعة /تقييم — إعطاء سمعة
+
+"
+        "⚙️ أخرى:
+"
+        "• /settings /اعدادات /ضبط — إعدادات الجروب
+"
+        "• /whisper /همسة /سر — همسة خاصة
+"
+        "• /ping /بنج /فحص — فحص البوت
+"
         "• /help /مساعدة /اوامر — هذه القائمة"
     )
-    await message.answer(help_text)
+    await message.answer(help_text, parse_mode=None)
