@@ -12,10 +12,7 @@ from app.database.session import AsyncSessionLocal
 
 async def init_db():
     from app.database.base import Base
-    from app.database.models import (
-        User, GroupSettings, Note, FilteredWord,
-        Warning, Mute, UserPoints, Log, Captcha
-    )
+    from app.database.session import async_engine
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -26,15 +23,29 @@ async def get_or_create_user(telegram_id: int, username: str | None, first_name:
             select(User).where(User.telegram_id == telegram_id)
         )
         user = result.scalar_one_or_none()
-        if not user:
-            user = User(
-                telegram_id=telegram_id,
-                username=username,
-                first_name=first_name
-            )
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
+        
+        if user:
+            # ✅ المستخدم موجود - تحديث البيانات فقط
+            updated = False
+            if username and user.username != username:
+                user.username = username
+                updated = True
+            if first_name and user.first_name != first_name:
+                user.first_name = first_name
+                updated = True
+            if updated:
+                await db.commit()
+            return user
+        
+        # ✅ إنشاء مستخدم جديد
+        user = User(
+            telegram_id=telegram_id,
+            username=username,
+            first_name=first_name
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
         return user
 
 
